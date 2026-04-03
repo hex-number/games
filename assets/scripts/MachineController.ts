@@ -7,11 +7,11 @@ const {ccclass, property} = _decorator;
 @ccclass('MachineController')
 export class MachineController extends Component {
 
-    private isSpinning: boolean = false;
+    isSpinning: boolean = false;
     private slotRes: SlotRes = null;
     private symbolSize: number = 80;
 
-    spin(slotRes: SlotRes) {
+    spin(duration:number, slotRes: SlotRes) {
         this.slotRes = slotRes;
         this.node.children.forEach((reel, i) => {
             const contentNode = reel.getChildByName("Content");
@@ -22,7 +22,6 @@ export class MachineController extends Component {
         const reels = this.node.children;
         const distance = this.symbolSize * (slotRes.rows-slotRes.valid);
         console.info("distance", distance);
-        const duration = 2;
         const easing = 'cubicBezier(0.25, 0.46, 0.5, 0.94)';
         const initPos = new Vec3(0, (slotRes.rows-slotRes.valid)/2*this.symbolSize, 0);
         const lastPos = new Vec3(0, initPos.y-distance, 0);

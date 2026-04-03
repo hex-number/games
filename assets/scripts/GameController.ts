@@ -1,4 +1,4 @@
-import {_decorator, Component, Event, Node} from 'cc';
+import {_decorator, AudioSource, Component, Event, Label, Node} from 'cc';
 import {Action, play, SlotCode, SlotRes} from "db://assets/scripts/Api";
 import {MachineController} from "db://assets/scripts/MachineController";
 
@@ -13,15 +13,46 @@ export class GameController extends Component {
     @property(Node)
     operationNode: Node;
 
-    private onClick(event: Event) {
+    private duration:number=2;
 
+    // Play music
+    onLoad() {
+    }
+
+    private onClickMusic(event: Event) {
+        let musicNode = this.operationNode.getChildByName('Functions').getChildByName('Music');
+        if (musicNode.getComponent(AudioSource).playing) {
+            musicNode.getComponent(AudioSource).pause();
+            musicNode.getChildByName('Label').getComponent(Label).string = '🔇';
+        } else {
+            musicNode.getComponent(AudioSource).play();
+            musicNode.getChildByName('Label').getComponent(Label).string = '🔊';
+        }
+    }
+
+    private onClickFlash(event: Event) {
+        let flashNode = this.operationNode.getChildByName('Functions').getChildByName('Flash');
+        if (flashNode.getChildByName('Label').getComponent(Label).isUnderline) {
+            flashNode.getChildByName('Label').getComponent(Label).isUnderline=false;
+            this.duration = 1;
+        } else {
+            flashNode.getChildByName('Label').getComponent(Label).isUnderline=true;
+            this.duration = 2;
+        }
+    }
+
+    private onClickPlay(event: Event) {
+        const component = this.machineNode.getComponent(MachineController);
+        if (component.isSpinning) {
+            return;
+        }
         play({slotCode:SlotCode.S001, action: Action.SPIN, player: 'test', bet: 20})
             .then(response=>{
                 this.statusNode.getChildByName('Error').active=false;
                 console.info('response=', response);
                 const slotRes = response.data as SlotRes;
                 console.info('slotRes=', slotRes);
-                this.machineNode.getComponent(MachineController).spin(slotRes);
+                component.spin(this.duration, slotRes);
             // }).catch(error=>{
             //     this.statusNode.getChildByName('Error').active=true;
             });
