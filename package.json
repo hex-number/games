@@ -3,5 +3,8 @@
   "uuid": "ae6862b9-8f2a-4fe1-85a7-1a4af8d41f60",
   "creator": {
     "version": "3.8.5"
+  },
+  "dependencies": {
+    "axios": "^1.14.0"
   }
 }
