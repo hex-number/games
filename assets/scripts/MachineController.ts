@@ -1,6 +1,7 @@
-import {_decorator, Component, Graphics, Label, tween, v3, Vec3} from 'cc';
+import {_decorator, Component, Label, Node, tween, v3, Vec3} from 'cc';
 import {SlotRes} from './Api';
-import {SYMBOL_MAP} from "db://assets/scripts/data";
+import {SYMBOL_MAP} from "db://assets/scripts/Data";
+import {EffectController} from "db://assets/scripts/EffectController";
 
 const {ccclass, property} = _decorator;
 
@@ -11,19 +12,35 @@ export class MachineController extends Component {
     private slotRes: SlotRes = null;
     private symbolSize: number = 80;
 
-    spin(duration:number, slotRes: SlotRes) {
+    initSymbols(idles:number, effectNode: Node) {
+        effectNode.getComponent(EffectController).removeLines();
+        this.node.children.forEach((reel, i) => {
+            const contentNode = reel.getChildByName("Content");
+            const size = Object.keys(SYMBOL_MAP).length;
+            contentNode.children.forEach((symbol, j) => {
+                if (j<idles) {
+                    const key = Object.keys(SYMBOL_MAP)[Math.floor(Math.random() * size)];
+                    symbol.getChildByName("Label").getComponent(Label).string = SYMBOL_MAP[key];
+                }
+            });
+        });
+    }
+
+    spin(duration:number, idles: number, slotRes: SlotRes, effectNode: Node) {
         this.slotRes = slotRes;
         this.node.children.forEach((reel, i) => {
             const contentNode = reel.getChildByName("Content");
             contentNode.children.forEach((symbol, j) => {
-                symbol.getChildByName("Label").getComponent(Label).string = SYMBOL_MAP[slotRes.symbols[i*slotRes.rows+j]];
+                if (j>=idles) {
+                    symbol.getChildByName("Label").getComponent(Label).string = SYMBOL_MAP[slotRes.symbols[i*slotRes.rows+j-idles]];
+                }
             });
         });
         const reels = this.node.children;
-        const distance = this.symbolSize * (slotRes.rows-slotRes.valid);
+        const distance = this.symbolSize * idles;
         console.info("distance", distance);
         const easing = 'cubicBezier(0.25, 0.46, 0.5, 0.94)';
-        const initPos = new Vec3(0, (slotRes.rows-slotRes.valid)/2*this.symbolSize, 0);
+        const initPos = new Vec3(0, idles/2*this.symbolSize, 0);
         const lastPos = new Vec3(0, initPos.y-distance, 0);
         console.info("initPos", initPos);
         console.info("lastPos", lastPos);
@@ -38,33 +55,33 @@ export class MachineController extends Component {
                 .call(() => {
                     this.isSpinning = false;
                     contentNode.setPosition(lastPos);
-
-                    const g = this.getComponent(Graphics);
-                    // 1. 基础样式设置
-                    g.lineWidth = 10;
-                    g.strokeColor.fromHEX('#00FBFF'); // 高亮青色
-                    const startPos = new Vec3(0, 0, 0);   // 起点
-                    const endPos = new Vec3(200, 200, 0); // 终点
-
-                    // 2. 使用一个对象来记录动画进度 (0 到 1)
-                    let ratio = { value: 0 };
-
-                    tween(ratio)
-                        .to(1.5, { value: 1 }, {
-                            onUpdate: () => {
-                                // 每次更新都重新绘制
-                                g.clear();
-                                g.moveTo(startPos.x, startPos.y);
-
-                                // 根据进度计算当前的终点坐标
-                                let curX = startPos.x + (endPos.x - startPos.x) * ratio.value;
-                                let curY = startPos.y + (endPos.y - startPos.y) * ratio.value;
-
-                                g.lineTo(curX, curY);
-                                g.stroke(); // 必须调用 stroke 才会显示
-                            }
-                        })
-                        .start();
+                    effectNode.getComponent(EffectController).setLines(duration, slotRes);
+                    // const g = this.getComponent(Graphics);
+                    // // 1. 基础样式设置
+                    // g.lineWidth = 10;
+                    // g.strokeColor.fromHEX('#00FBFF'); // 高亮青色
+                    // const startPos = new Vec3(0, 0, 0);   // 起点
+                    // const endPos = new Vec3(200, 200, 0); // 终点
+                    //
+                    // // 2. 使用一个对象来记录动画进度 (0 到 1)
+                    // let ratio = { value: 0 };
+                    //
+                    // tween(ratio)
+                    //     .to(1.5, { value: 1 }, {
+                    //         onUpdate: () => {
+                    //             // 每次更新都重新绘制
+                    //             g.clear();
+                    //             g.moveTo(startPos.x, startPos.y);
+                    //
+                    //             // 根据进度计算当前的终点坐标
+                    //             let curX = startPos.x + (endPos.x - startPos.x) * ratio.value;
+                    //             let curY = startPos.y + (endPos.y - startPos.y) * ratio.value;
+                    //
+                    //             g.lineTo(curX, curY);
+                    //             g.stroke(); // 必须调用 stroke 才会显示
+                    //         }
+                    //     })
+                    //     .start();
                     // if (slotRes.lines) {
                     //     slotRes.lines.forEach(line=>{
                     //         tween(progress)

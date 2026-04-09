@@ -9,7 +9,7 @@ export class ReelController extends Component {
 
     private symbols: Node[] = [];
     private symbolSize: number = 80;
-    private totalCount: number = 11; // 逻辑上的总种类数
+    private idleCount: number = 12;
     private displayCount: number = 3;  // 遮罩内显示的个数
 
     private isSpinning: boolean = false;
@@ -20,8 +20,18 @@ export class ReelController extends Component {
     onLoad() {
         // 1. 获取所有子节点并初始化位置
         this.symbols = this.contentNode.children;
-        this.resetSymbols();
+        // this.initSymbols();
     }
+
+    // initSymbols() {
+    //     for (let i = 0; i < this.idleCount; i++) {
+    //         const size = Object.keys(SYMBOL_MAP).length;
+    //         const key = Object.keys(SYMBOL_MAP)[Math.floor(Math.random() * size)];
+    //         const symbolNode = this.symbols[i];
+    //         const label = symbolNode.getComponent(Label);
+    //         label.string = SYMBOL_MAP[key];
+    //     }
+    // }
 
     resetSymbols() {
         for (let i = 0; i < this.symbols.length; i++) {

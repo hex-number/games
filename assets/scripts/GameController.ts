@@ -13,6 +13,9 @@ export class GameController extends Component {
     @property(Node)
     operationNode: Node;
 
+    @property(Node)
+    effectNode: Node;
+
     private duration:number=2;
 
     // Play music
@@ -42,17 +45,19 @@ export class GameController extends Component {
     }
 
     private onClickPlay(event: Event) {
-        const component = this.machineNode.getComponent(MachineController);
-        if (component.isSpinning) {
+        const machine = this.machineNode.getComponent(MachineController);
+        if (machine.isSpinning) {
             return;
         }
+        const idles = 12;
+        machine.initSymbols(idles, this.effectNode);
         play({slotCode:SlotCode.S001, action: Action.SPIN, player: 'test', bet: 20})
             .then(response=>{
                 this.statusNode.getChildByName('Error').active=false;
                 console.info('response=', response);
                 const slotRes = response.data as SlotRes;
                 console.info('slotRes=', slotRes);
-                component.spin(this.duration, slotRes);
+                machine.spin(this.duration, idles, slotRes, this.effectNode);
             // }).catch(error=>{
             //     this.statusNode.getChildByName('Error').active=true;
             });

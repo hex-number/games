@@ -26,7 +26,7 @@ export interface SlotRes {
     rows: number;
     valid: number;
     symbols: number[];
-    lines: Array<[number[], number]>;
+    lines: Entry<number[], number>[];
     frees: number[];
     multiples: number[];
     scatters: number[];
@@ -35,6 +35,11 @@ export interface SlotRes {
     win: number;
     freeCount: number;
     balance: number;
+}
+
+export interface Entry<K,V> {
+    k: K;
+    v: V;
 }
 
 export const play =  (req: SlotReq) => {
