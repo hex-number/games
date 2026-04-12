@@ -16,7 +16,7 @@ export class EffectController extends Component {
         g.clear();
     }
 
-    setLines(duration:number, slotRes: SlotRes) {
+    setLines(duration:number, slotRes: SlotRes, finish: ()=>void) {
 
         const g = this.getComponent(Graphics);
         if (!g) return;
@@ -44,6 +44,11 @@ export class EffectController extends Component {
         //     })
         //     .start();
 
+        if (!slotRes.lines || slotRes.lines.length<=0) {
+            finish();
+            return;
+        }
+
         let data = { progress: 0 };
         tween(data)
             .to(duration, { progress: 1 }, {
@@ -63,6 +68,7 @@ export class EffectController extends Component {
                     });
                 }
             })
+            .call(() => finish())
             .start();
 
 

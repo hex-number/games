@@ -3,9 +3,9 @@ export const SYMBOL_MAP: Record<number, string> = {
     1: '🍒',
     2: '🍋',
     3: '🍊',
-    4: '🍇',
-    5: '🍋',
-    6: '🍓',
+    4: '🍓',
+    5: '🍌',
+    6: '🍇',
     60: '🍀',
     70: '⭐',
     80: '💰',
@@ -16,9 +16,9 @@ export const SYMBOL_MAP: Record<number, string> = {
 export const SYMBOL_SIZE = 80;
 
 export const LINE_COLOR: Record<number, string> = {
-    2: '#669900',
-    4: '#006600',
-    6: '#CC0000',
+    1: '#333333',
+    3: '#006600',
+    4: '#CC0000',
     8: '#CCCC33',
 }
 

@@ -36,7 +36,6 @@ export class MachineController extends Component {
                 }
             });
         });
-        const reels = this.node.children;
         const distance = this.symbolSize * idles;
         console.info("distance", distance);
         const easing = 'cubicBezier(0.25, 0.46, 0.5, 0.94)';
@@ -44,63 +43,91 @@ export class MachineController extends Component {
         const lastPos = new Vec3(0, initPos.y-distance, 0);
         console.info("initPos", initPos);
         console.info("lastPos", lastPos);
-        reels.forEach((reel, i) => {
+        const reels = this.node.children;
+        const promises = reels.map((reel, i) => {
             const contentNode = reel.getChildByName("Content");
             contentNode.setPosition(initPos);
-            tween(contentNode)
-                .by(duration, { position: v3(0, -distance, 0) }, {
-                    easing: 'backOut' // 使用 backOut 增加 Slot 常见的“回弹”感
-                    // easing: 'cubicBezier(0.25, 0.46, 0.5, 0.94)'
-                })
-                .call(() => {
-                    this.isSpinning = false;
-                    contentNode.setPosition(lastPos);
-                    effectNode.getComponent(EffectController).setLines(duration, slotRes);
-                    // const g = this.getComponent(Graphics);
-                    // // 1. 基础样式设置
-                    // g.lineWidth = 10;
-                    // g.strokeColor.fromHEX('#00FBFF'); // 高亮青色
-                    // const startPos = new Vec3(0, 0, 0);   // 起点
-                    // const endPos = new Vec3(200, 200, 0); // 终点
-                    //
-                    // // 2. 使用一个对象来记录动画进度 (0 到 1)
-                    // let ratio = { value: 0 };
-                    //
-                    // tween(ratio)
-                    //     .to(1.5, { value: 1 }, {
-                    //         onUpdate: () => {
-                    //             // 每次更新都重新绘制
-                    //             g.clear();
-                    //             g.moveTo(startPos.x, startPos.y);
-                    //
-                    //             // 根据进度计算当前的终点坐标
-                    //             let curX = startPos.x + (endPos.x - startPos.x) * ratio.value;
-                    //             let curY = startPos.y + (endPos.y - startPos.y) * ratio.value;
-                    //
-                    //             g.lineTo(curX, curY);
-                    //             g.stroke(); // 必须调用 stroke 才会显示
-                    //         }
-                    //     })
-                    //     .start();
-                    // if (slotRes.lines) {
-                    //     slotRes.lines.forEach(line=>{
-                    //         tween(progress)
-                    //             .to(1, { value: 1 }, {
-                    //                 onUpdate: () => {
-                    //                     g.clear();
-                    //                     g.moveTo(-200, 0);
-                    //                     // 计算当前进度的终点
-                    //                     let currentX = 200 * progress.value;
-                    //                     let currentY = 0;
-                    //                     g.lineTo(currentX, currentY);
-                    //                     g.stroke();
-                    //                 }
-                    //             })
-                    //             .start();
-                    //     });
-                    // }
-                })
-                .start();
+            return new Promise<void>(resolve => {
+                tween(contentNode)
+                    .by(duration, { position: v3(0, -distance, 0) }, {
+                        easing: 'backOut' // 使用 backOut 增加 Slot 常见的“回弹”感
+                        // easing: 'cubicBezier(0.25, 0.46, 0.5, 0.94)'
+                    })
+                    .call(() => {
+                        contentNode.setPosition(lastPos);
+                        resolve();
+                    })
+                    .start();
+            });
         });
+        const finish = ()=> {
+            this.isSpinning = false;
+            console.info('finished!');
+        }
+        Promise.all(promises).then(() => {
+            effectNode.getComponent(EffectController).setLines(duration, slotRes, finish);
+        });
+
+        // reels.forEach((reel, i) => {
+        //     const contentNode = reel.getChildByName("Content");
+        //     contentNode.setPosition(initPos);
+        //     tween(contentNode)
+        //         .by(duration, { position: v3(0, -distance, 0) }, {
+        //             easing: 'backOut' // 使用 backOut 增加 Slot 常见的“回弹”感
+        //             // easing: 'cubicBezier(0.25, 0.46, 0.5, 0.94)'
+        //         })
+        //         .call(() => {
+        //             contentNode.setPosition(lastPos);
+        //             const finish = ()=> {
+        //                 this.isSpinning = false;
+        //                 console.info('finished!');
+        //             }
+        //             effectNode.getComponent(EffectController).setLines(duration, slotRes, finish);
+        //             // const g = this.getComponent(Graphics);
+        //             // // 1. 基础样式设置
+        //             // g.lineWidth = 10;
+        //             // g.strokeColor.fromHEX('#00FBFF'); // 高亮青色
+        //             // const startPos = new Vec3(0, 0, 0);   // 起点
+        //             // const endPos = new Vec3(200, 200, 0); // 终点
+        //             //
+        //             // // 2. 使用一个对象来记录动画进度 (0 到 1)
+        //             // let ratio = { value: 0 };
+        //             //
+        //             // tween(ratio)
+        //             //     .to(1.5, { value: 1 }, {
+        //             //         onUpdate: () => {
+        //             //             // 每次更新都重新绘制
+        //             //             g.clear();
+        //             //             g.moveTo(startPos.x, startPos.y);
+        //             //
+        //             //             // 根据进度计算当前的终点坐标
+        //             //             let curX = startPos.x + (endPos.x - startPos.x) * ratio.value;
+        //             //             let curY = startPos.y + (endPos.y - startPos.y) * ratio.value;
+        //             //
+        //             //             g.lineTo(curX, curY);
+        //             //             g.stroke(); // 必须调用 stroke 才会显示
+        //             //         }
+        //             //     })
+        //             //     .start();
+        //             // if (slotRes.lines) {
+        //             //     slotRes.lines.forEach(line=>{
+        //             //         tween(progress)
+        //             //             .to(1, { value: 1 }, {
+        //             //                 onUpdate: () => {
+        //             //                     g.clear();
+        //             //                     g.moveTo(-200, 0);
+        //             //                     // 计算当前进度的终点
+        //             //                     let currentX = 200 * progress.value;
+        //             //                     let currentY = 0;
+        //             //                     g.lineTo(currentX, currentY);
+        //             //                     g.stroke();
+        //             //                 }
+        //             //             })
+        //             //             .start();
+        //             //     });
+        //             // }
+        //         })
+        //         .start();
+        // });
     }
 }
