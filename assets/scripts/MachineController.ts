@@ -1,6 +1,6 @@
 import {_decorator, Component, Label, Node, tween, v3, Vec3} from 'cc';
 import {SlotRes} from './Api';
-import {SYMBOL_MAP} from "db://assets/scripts/Data";
+import {SYMBOL_MAP, SYMBOL_SIZE} from "db://assets/scripts/Data";
 import {EffectController} from "db://assets/scripts/EffectController";
 
 const {ccclass, property} = _decorator;
@@ -10,7 +10,6 @@ export class MachineController extends Component {
 
     isSpinning: boolean = false;
     private slotRes: SlotRes = null;
-    private symbolSize: number = 80;
 
     initSymbols(idles:number, effectNode: Node) {
         effectNode.getComponent(EffectController).removeLines();
@@ -36,10 +35,10 @@ export class MachineController extends Component {
                 }
             });
         });
-        const distance = this.symbolSize * idles;
+        const distance = SYMBOL_SIZE * idles;
         console.info("distance", distance);
         const easing = 'cubicBezier(0.25, 0.46, 0.5, 0.94)';
-        const initPos = new Vec3(0, idles/2*this.symbolSize, 0);
+        const initPos = new Vec3(0, idles/2*SYMBOL_SIZE, 0);
         const lastPos = new Vec3(0, initPos.y-distance, 0);
         console.info("initPos", initPos);
         console.info("lastPos", lastPos);

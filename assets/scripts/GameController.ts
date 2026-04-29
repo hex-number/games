@@ -29,7 +29,7 @@ export class GameController extends Component {
     @property(SpriteFrame)
     public autoOffFile: SpriteFrame = null;
 
-    private duration:number=2;
+    private duration:number=1;
     private auto: boolean = false;
     private betAmount = 20;
 
@@ -40,7 +40,7 @@ export class GameController extends Component {
     }
 
     private onClickFlash(event: Event) {
-        const flashNode = this.operationNode.getChildByName('Options').getChildByName('Flash');
+        const flashNode = this.operationNode.getChildByName('Settings').getChildByName('Flash');
         if (this.duration === 1) {
             flashNode.getComponent(Sprite).spriteFrame = this.flashOffFile;
             this.duration = 2;
@@ -51,7 +51,7 @@ export class GameController extends Component {
     }
 
     private onClickAuto(event: Event) {
-        const autoNode = this.operationNode.getChildByName('Options').getChildByName('Auto');
+        const autoNode = this.operationNode.getChildByName('Functions').getChildByName('Auto');
         if (this.auto) {
             autoNode.getComponent(Sprite).spriteFrame = this.autoOffFile;
             this.auto = false;
@@ -80,14 +80,24 @@ export class GameController extends Component {
     }
 
     private onClickMusic(event: Event) {
-        const musicNode = this.operationNode.getChildByName('Functions').getChildByName('Music');
-        if (musicNode.getComponent(AudioSource).playing) {
-            musicNode.getComponent(AudioSource).pause();
+        const musicNode = this.operationNode.getChildByName('Settings').getChildByName('Music');
+        if (this.operationNode.getComponent(AudioSource).playing) {
+            this.operationNode.getComponent(AudioSource).pause();
             musicNode.getComponent(Sprite).spriteFrame = this.musicOffFile;
         } else {
-            musicNode.getComponent(AudioSource).play();
+            this.operationNode.getComponent(AudioSource).play();
             musicNode.getComponent(Sprite).spriteFrame = this.musicOnFile;
         }
+    }
+
+    private onMenuOpen(event: Event) {
+        this.operationNode.getChildByName('Functions').active=false;
+        this.operationNode.getChildByName('Settings').active=true;
+    }
+
+    private onMenuClose(event: Event) {
+        this.operationNode.getChildByName('Functions').active=true;
+        this.operationNode.getChildByName('Settings').active=false;
     }
 
     private onClickSpin(event: Event) {
@@ -96,11 +106,12 @@ export class GameController extends Component {
             return;
         }
         machine.isSpinning=true;
-        const spinNode = this.operationNode.getChildByName('Options').getChildByName('Spin');
+        const spinNode = this.operationNode.getChildByName('Functions').getChildByName('Spin');
         tween(spinNode)
             .by(this.duration, { angle: -1440 })
             .start();
         const idles = 12;
+        spinNode.getComponent(AudioSource).play();
         machine.initSymbols(idles, this.effectNode);
         play({slotCode:SlotCode.S001, action: Action.SPIN, player: 'test', bet: 20})
             .then(response=>{
