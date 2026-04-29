@@ -13,7 +13,7 @@ export const SYMBOL_MAP: Record<number, string> = {
     100: '💎'
 }
 
-export const SYMBOL_SIZE = 80;
+export const SYMBOL_SIZE = 160;
 
 export const LINE_COLOR: Record<number, string> = {
     1: '#333333',

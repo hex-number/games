@@ -44,10 +44,6 @@ export class EffectController extends Component {
         //     })
         //     .start();
 
-        if (!slotRes.lines || slotRes.lines.length<=0) {
-            finish();
-            return;
-        }
 
         let data = { progress: 0 };
         tween(data)
@@ -55,17 +51,20 @@ export class EffectController extends Component {
                 onUpdate: () => {
                     g.clear();
                     const lines = slotRes.lines;
-                    // const lines = [
-                    //     {k:[0,1,2], v:2},
-                    //     {k:[3,4,5], v:2},
-                    //     {k:[6,7,8], v:2},
-                    //     {k:[9,10,11], v:2},
-                    //     {k:[12,13,14], v:2},
-                    // ];
-                    // Loop through every line and draw it
-                    lines.forEach((value, index, array) => {
-                        this.drawPolyline(g, value, slotRes.rows, slotRes.cols, data.progress);
-                    });
+
+                    if (slotRes.lines && slotRes.lines.length>0) {
+                        // const lines = [
+                        //     {k:[0,1,2], v:2},
+                        //     {k:[3,4,5], v:2},
+                        //     {k:[6,7,8], v:2},
+                        //     {k:[9,10,11], v:2},
+                        //     {k:[12,13,14], v:2},
+                        // ];
+                        // Loop through every line and draw it
+                        lines.forEach((value, index, array) => {
+                            this.drawPolyline(g, value, slotRes.rows, slotRes.cols, data.progress);
+                        });
+                    }
                 }
             })
             .call(() => finish())

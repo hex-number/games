@@ -18,6 +18,8 @@ export interface SlotReq {
     action: Action;
 
     bet: number;
+
+    idleSymbols: number[];
 }
 
 
@@ -43,7 +45,7 @@ export interface Entry<K,V> {
 }
 
 export const play =  (req: SlotReq) => {
-    return post(`${HTTP_URL}/game/slot/play`, 'POST', req);
+    return post(`${HTTP_URL}/player/play`, 'POST', req);
 }
 
 // fetch-wrapper.ts

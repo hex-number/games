@@ -1,6 +1,6 @@
 import {_decorator, Component, Label, Node, tween, v3, Vec3} from 'cc';
 import {SlotRes} from './Api';
-import {SYMBOL_MAP} from "db://assets/scripts/Data";
+import {SYMBOL_MAP, SYMBOL_SIZE} from "db://assets/scripts/Data";
 import {EffectController} from "db://assets/scripts/EffectController";
 
 const {ccclass, property} = _decorator;
@@ -9,10 +9,9 @@ const {ccclass, property} = _decorator;
 export class MachineController extends Component {
 
     isSpinning: boolean = false;
-    private slotRes: SlotRes = null;
-    private symbolSize: number = 80;
 
-    initSymbols(idles:number, effectNode: Node) {
+    initSymbols(idles:number, effectNode: Node): number[] {
+        const idleSymbols:number[] = [];
         effectNode.getComponent(EffectController).removeLines();
         this.node.children.forEach((reel, i) => {
             const contentNode = reel.getChildByName("Content");
@@ -20,14 +19,15 @@ export class MachineController extends Component {
             contentNode.children.forEach((symbol, j) => {
                 if (j<idles) {
                     const key = Object.keys(SYMBOL_MAP)[Math.floor(Math.random() * size)];
+                    idleSymbols.push(Number(key));
                     symbol.getChildByName("Label").getComponent(Label).string = SYMBOL_MAP[key];
                 }
             });
         });
+        return idleSymbols;
     }
 
-    spin(duration:number, idles: number, slotRes: SlotRes, effectNode: Node) {
-        this.slotRes = slotRes;
+    spin(duration:number, idles: number, slotRes: SlotRes, effectNode: Node, finish: ()=>void ) {
         this.node.children.forEach((reel, i) => {
             const contentNode = reel.getChildByName("Content");
             contentNode.children.forEach((symbol, j) => {
@@ -36,10 +36,10 @@ export class MachineController extends Component {
                 }
             });
         });
-        const distance = this.symbolSize * idles;
+        const distance = SYMBOL_SIZE * idles;
         console.info("distance", distance);
         const easing = 'cubicBezier(0.25, 0.46, 0.5, 0.94)';
-        const initPos = new Vec3(0, idles/2*this.symbolSize, 0);
+        const initPos = new Vec3(0, idles/2*SYMBOL_SIZE, 0);
         const lastPos = new Vec3(0, initPos.y-distance, 0);
         console.info("initPos", initPos);
         console.info("lastPos", lastPos);
@@ -60,11 +60,39 @@ export class MachineController extends Component {
                     .start();
             });
         });
-        const finish = ()=> {
-            this.isSpinning = false;
-            console.info('finished!');
-        }
         Promise.all(promises).then(() => {
+
+            // slotRes.multiples
+            let multipleNode = this.node.children[1].getChildByName("Content").children[13];
+            let fontSize = multipleNode.getChildByName('Label').getComponent(Label).fontSize;
+            let obj = { value: 0.5 };
+            tween(obj)
+                .to(duration, { value: 1.5 }, {
+                    // 每帧更新回调
+                    onUpdate: () => {
+                        multipleNode.getChildByName('Label').getComponent(Label).fontSize=Math.round(obj.value*fontSize);
+                    },
+                    // 设置缓动效果（可选），例如 SineOut 让动画结束时变慢
+                    easing: 'sineOut',
+                }).call(() => {
+                    multipleNode.getChildByName('Label').getComponent(Label).fontSize=fontSize;
+                })
+                .start();
+            // slotRes.scatters
+            let scatterNode = this.node.children[2].getChildByName("Content").children[13];
+            let string = scatterNode.getChildByName('Label').getComponent(Label).string;
+            tween(obj)
+                .to(duration, { value: 2 }, {
+                    // 每帧更新回调
+                    onUpdate: () => {
+                        scatterNode.getChildByName('Label').getComponent(Label).string=Math.round((2-obj.value)*10)%2==0?string:'';
+                    },
+                    // 设置缓动效果（可选），例如 SineOut 让动画结束时变慢
+                    easing: 'sineOut',
+                }).call(() => {
+                    scatterNode.getChildByName('Label').getComponent(Label).string=string;
+                })
+                .start();
             effectNode.getComponent(EffectController).setLines(duration, slotRes, finish);
         });
 
